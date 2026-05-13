@@ -412,7 +412,7 @@ export default function Dashboard() {
         <span>THREAT: <span style={{ color: threatColor, fontWeight: 700 }} className={threatLevel === 'CRITICAL' ? 'animate-threat-flash' : ''}>{threatLevel}</span></span>
         {spaceWeather && <span className="hidden lg:inline">SOLAR: <span style={{ color: spaceWeather.storm_color, fontWeight: 700 }}>Kp{spaceWeather.kp_index}</span></span>}
         <span className="hidden lg:inline">UPTIME: <span className="text-[var(--gold-primary)]">{uptime}</span></span>
-        <span>V3.2</span>
+        <span>V3.3</span>
       </motion.div>
 
       {/* ── MOBILE: Compact top status ── */}
