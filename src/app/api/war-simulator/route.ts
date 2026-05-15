@@ -58,13 +58,66 @@ function generateId() {
   return Math.random().toString(36).substr(2, 9);
 }
 
-// Simulated fallback events if GDELT is truly dead
-const FALLBACK_EVENTS = [
-  { targetLat: 31.7, targetLng: 35.2, name: 'Jerusalem, Israel', url: 'https://reuters.com/world/middle-east' },
-  { targetLat: 35.68, targetLng: 51.38, name: 'Tehran, Iran', url: 'https://reuters.com/world/middle-east' },
-  { targetLat: 33.88, targetLng: 35.49, name: 'Beirut, Lebanon', url: 'https://reuters.com/world/middle-east' },
-  { targetLat: 50.45, targetLng: 30.52, name: 'Kyiv, Ukraine', url: 'https://reuters.com/world/europe' }
-];
+// Simple XML parsing for RSS
+function parseRSSItems(xml: string): any[] {
+  const items: any[] = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+  let match;
+
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemXml = match[1];
+    const getTag = (tag: string) => {
+      const m = itemXml.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>|<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+      return (m?.[1] || m?.[2] || '').trim();
+    };
+
+    items.push({
+      title: getTag('title').replace(/<[^>]+>/g, ''),
+      link: getTag('link'),
+    });
+  }
+  return items;
+}
+
+// Simulated fallback events if GDELT is truly dead, augmented with live RSS links if possible
+let cachedFallbacks: any[] | null = null;
+let lastFallbackFetch = 0;
+
+async function getLiveFallbacks() {
+  const now = Date.now();
+  if (cachedFallbacks && now - lastFallbackFetch < 300000) return cachedFallbacks; // cache 5 mins
+
+  const defaultFallbacks = [
+    { targetLat: 31.7, targetLng: 35.2, name: 'Jerusalem, Israel', url: 'https://reuters.com/world/middle-east' },
+    { targetLat: 35.68, targetLng: 51.38, name: 'Tehran, Iran', url: 'https://reuters.com/world/middle-east' },
+    { targetLat: 33.88, targetLng: 35.49, name: 'Beirut, Lebanon', url: 'https://reuters.com/world/middle-east' },
+    { targetLat: 50.45, targetLng: 30.52, name: 'Kyiv, Ukraine', url: 'https://reuters.com/world/europe' }
+  ];
+
+  try {
+    const res = await fetch('https://www.aljazeera.com/xml/rss/all.xml', { signal: AbortSignal.timeout(4000) });
+    if (res.ok) {
+      const xml = await res.text();
+      const items = parseRSSItems(xml);
+      
+      const matchItem = (kw: string) => items.find(i => i.title.toLowerCase().includes(kw) || i.link.toLowerCase().includes(kw))?.link;
+
+      cachedFallbacks = [
+        { targetLat: 31.7, targetLng: 35.2, name: 'Jerusalem, Israel', url: matchItem('israel') || matchItem('gaza') || defaultFallbacks[0].url },
+        { targetLat: 35.68, targetLng: 51.38, name: 'Tehran, Iran', url: matchItem('iran') || matchItem('tehran') || defaultFallbacks[1].url },
+        { targetLat: 33.88, targetLng: 35.49, name: 'Beirut, Lebanon', url: matchItem('lebanon') || matchItem('beirut') || matchItem('hezbollah') || defaultFallbacks[2].url },
+        { targetLat: 50.45, targetLng: 30.52, name: 'Kyiv, Ukraine', url: matchItem('ukraine') || matchItem('russia') || defaultFallbacks[3].url }
+      ];
+      lastFallbackFetch = now;
+      return cachedFallbacks;
+    }
+  } catch (e) {
+    console.warn('Live fallback RSS fetch failed', e);
+  }
+
+  return defaultFallbacks;
+}
+
 
 let liveAlertsState: any[] = [];
 let lastFetch = 0;
@@ -97,7 +150,8 @@ export async function GET() {
 
       // If GDELT returns 0 features or fails, use fallback
       if (features.length === 0) {
-        features = FALLBACK_EVENTS.map(e => ({
+        const fallbacks = await getLiveFallbacks();
+        features = fallbacks.map(e => ({
           geometry: { coordinates: [e.targetLng, e.targetLat] },
           properties: { name: e.name, url: e.url, html: 'Simulated News Ping due to API silence.' }
         }));
