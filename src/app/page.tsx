@@ -640,19 +640,31 @@ export default function Dashboard() {
                     </div>
                   )}
                   {mobilePanel === 'war_sim' && (
-                    <div className="space-y-2 flex flex-col items-center">
+                    <div className="space-y-2 flex flex-col items-center w-full">
                       {!showWarSim ? (
-                        <button onClick={() => { setShowWarSim(true); setMobilePanel(null); }} className="w-full flex items-center justify-center gap-2 px-4 py-4 mt-4 bg-red-500/20 border border-red-500 text-red-400 font-mono tracking-widest font-bold rounded-lg uppercase shadow-[0_0_20px_rgba(255,0,0,0.4)]">
-                          <RadioTower className="w-5 h-5 animate-pulse" /> ENGAGE WAR SIMULATOR
-                        </button>
+                        <>
+                          <button onClick={() => { setShowWarSim(true); }} className="w-full flex items-center justify-center gap-2 px-4 py-4 mt-2 bg-red-500/20 border border-red-500 text-red-400 font-mono tracking-widest font-bold rounded-lg uppercase shadow-[0_0_20px_rgba(255,0,0,0.4)]">
+                            <RadioTower className="w-5 h-5 animate-pulse" /> ENGAGE WAR SIMULATOR
+                          </button>
+                          <p className="text-[10px] text-[var(--text-muted)] font-mono text-center mt-2 px-4">
+                            Engaging the simulator activates the global DEFCON state and enables real-time kinetic OSINT mapping.
+                          </p>
+                        </>
                       ) : (
-                        <button onClick={() => { setShowWarSim(false); setMobilePanel(null); }} className="w-full flex items-center justify-center gap-2 px-4 py-4 mt-4 bg-red-900/50 border border-red-900 text-red-400 font-mono tracking-widest font-bold rounded-lg uppercase">
-                          DISENGAGE SIMULATOR
-                        </button>
+                        <div className="w-full">
+                          <button onClick={() => { setShowWarSim(false); }} className="w-full flex items-center justify-center gap-2 px-3 py-2 mb-2 bg-red-900/30 border border-red-900/50 text-red-500/80 hover:text-red-400 font-mono text-[10px] tracking-widest font-bold rounded">
+                            DISENGAGE
+                          </button>
+                          <WarSimulatorPanel 
+                            onClose={() => setMobilePanel(null)} 
+                            onLocate={(lat, lng) => { 
+                              setFlyToLocation({ lat, lng, ts: Date.now() }); 
+                              setMobilePanel(null); 
+                            }} 
+                            isMobile={true} 
+                          />
+                        </div>
                       )}
-                      <p className="text-[10px] text-[var(--text-muted)] font-mono text-center mt-2 px-4">
-                        Engaging the simulator activates the global DEFCON state and enables real-time predictive trajectory calculations on the map.
-                      </p>
                     </div>
                   )}
                 </div>

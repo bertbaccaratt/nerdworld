@@ -2,7 +2,7 @@
 
 import { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crosshair, AlertOctagon, Target, Timer, RadioTower, Zap, X } from 'lucide-react';
+import { Crosshair, AlertOctagon, Target, Timer, RadioTower, Zap, X, ExternalLink } from 'lucide-react';
 
 interface Alert {
   id: string;
@@ -16,15 +16,17 @@ interface Alert {
   threatLevel: string;
   status: string;
   source: string;
+  sourceUrl?: string;
   timeToImpactMs: number;
 }
 
 interface WarSimulatorPanelProps {
   onClose: () => void;
   onLocate: (lat: number, lng: number) => void;
+  isMobile?: boolean;
 }
 
-function WarSimulatorPanelInner({ onClose, onLocate }: WarSimulatorPanelProps) {
+function WarSimulatorPanelInner({ onClose, onLocate, isMobile }: WarSimulatorPanelProps) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [defcon, setDefcon] = useState(4);
   const [now, setNow] = useState(Date.now());
@@ -78,13 +80,14 @@ function WarSimulatorPanelInner({ onClose, onLocate }: WarSimulatorPanelProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="glass-panel flex flex-col pointer-events-auto border-red-500/30 overflow-hidden"
-      style={{ boxShadow: defcon <= 2 ? '0 0 20px rgba(255,0,0,0.2)' : undefined }}
+      initial={isMobile ? {} : { opacity: 0, x: 20 }}
+      animate={isMobile ? {} : { opacity: 1, x: 0 }}
+      exit={isMobile ? {} : { opacity: 0, x: 20 }}
+      className={`${isMobile ? 'w-full' : 'glass-panel border-red-500/30'} flex flex-col pointer-events-auto overflow-hidden`}
+      style={{ boxShadow: (!isMobile && defcon <= 2) ? '0 0 20px rgba(255,0,0,0.2)' : undefined }}
     >
-      <div className="flex items-center justify-between px-4 py-3 bg-red-500/10 border-b border-red-500/30">
+      {!isMobile && (
+        <div className="flex items-center justify-between px-4 py-3 bg-red-500/10 border-b border-red-500/30">
         <div className="flex items-center gap-2">
           <RadioTower className={`w-4 h-4 ${defcon <= 2 ? 'text-red-500 animate-pulse' : 'text-[var(--gold-primary)]'}`} />
           <span className="hud-text text-[12px] text-white">WAR SIMULATOR</span>
@@ -100,8 +103,9 @@ function WarSimulatorPanelInner({ onClose, onLocate }: WarSimulatorPanelProps) {
           </button>
         </div>
       </div>
+      )}
 
-      <div className="p-3 max-h-[60vh] overflow-y-auto styled-scrollbar">
+      <div className={`${isMobile ? 'p-1 max-h-[50vh]' : 'p-3 max-h-[60vh]'} overflow-y-auto styled-scrollbar`}>
         {alerts.length === 0 ? (
           <div className="py-8 text-center flex flex-col items-center opacity-50">
             <Target className="w-8 h-8 text-[var(--alert-green)] mb-2" />
@@ -151,6 +155,20 @@ function WarSimulatorPanelInner({ onClose, onLocate }: WarSimulatorPanelProps) {
                         <div className={`text-[11px] font-mono font-bold truncate ${hasImpacted ? 'text-[var(--text-muted)]' : 'text-[var(--gold-primary)]'}`}>{alert.city}</div>
                       </div>
                     </div>
+
+                    {alert.sourceUrl && (
+                      <div className="mt-2.5 pt-2 border-t border-red-500/20 relative z-10">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(alert.sourceUrl, '_blank', 'noopener,noreferrer');
+                          }}
+                          className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[9px] font-mono font-bold rounded border border-red-500/20 transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" /> VERIFY SOURCE
+                        </button>
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
