@@ -9,6 +9,7 @@ import {
   CheckCircle, XCircle, Clock, ExternalLink, Crosshair,
   Maximize2, Minimize2, Gavel, Bitcoin, Phone, Terminal, ShieldAlert
 } from 'lucide-react';
+import { ipToNumber, numberToIp, calculateSubnetStart, classifyDevice, assessRisk, batchFetch, ShodanInternetDBResponse, SweepDevice } from '@/lib/osint-utils';
 
 const TABS = [
   { id: 'scanner', label: 'PORT SCAN', icon: Radar, placeholder: 'IP or hostname', color: '#00E5FF' },
@@ -81,13 +82,62 @@ function OsintPanelInner({ isMobile, onSweepVisualize, onScanGeolocate }: OsintP
     // IP Sweep / Vuln Scan — separate flow
     if (activeTab === 'sweep' || activeTab === 'vuln') {
       setSweepResult(null);
-      setSweepProgress({ current: 0, total: Math.pow(2, 32 - sweepCidr) });
+      const cidr = sweepCidr;
+      const totalHosts = Math.pow(2, 32 - cidr);
+      setSweepProgress({ current: 0, total: totalHosts });
       try {
-        const cidr = sweepCidr;
+        const t0 = Date.now();
         const res = await fetch(`/api/osint/sweep?ip=${encodeURIComponent(query)}&cidr=${cidr}`);
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Sweep failed (${res.status})`); }
-        const data = await res.json();
-        setSweepResult(data);
+        const initData = await res.json();
+
+        const ipParts = initData.target_ip.split('.').map(Number) as [number, number, number, number];
+        const ipNum = ipToNumber(ipParts);
+        const subnetStart = calculateSubnetStart(ipNum, cidr);
+        const subnet = numberToIp(subnetStart);
+
+        const urls: string[] = [];
+        for (let i = 0; i < totalHosts; i++) {
+          urls.push(`https://internetdb.shodan.io/${numberToIp((subnetStart + i) >>> 0)}`);
+        }
+
+        const shodanResults = await batchFetch<ShodanInternetDBResponse>(urls, 15, async (u) => {
+          try {
+            const r = await fetch(u, { cache: 'no-store' });
+            if (r.status === 404) return null;
+            if (!r.ok) return null;
+            return await r.json();
+          } catch {
+            return null;
+          }
+        }, (done) => setSweepProgress({ current: done, total: totalHosts }));
+
+        const devices: SweepDevice[] = [];
+        const deviceBreakdown: Record<string, number> = {};
+        for (const sr of shodanResults) {
+          if (!sr) continue;
+          const classification = classifyDevice(sr.ports, sr.cpes, sr.tags);
+          const risk = assessRisk({ ports: sr.ports, vulns: sr.vulns });
+          devices.push({
+            ip: sr.ip, ports: sr.ports, hostnames: sr.hostnames,
+            cpes: sr.cpes, vulns: sr.vulns, tags: sr.tags,
+            device_type: classification.device_type,
+            device_icon: classification.device_icon,
+            device_color: classification.device_color,
+            risk_level: risk
+          });
+          deviceBreakdown[classification.device_type] = (deviceBreakdown[classification.device_type] || 0) + 1;
+        }
+
+        setSweepResult({
+          center: initData.center,
+          subnet: `${subnet}/${cidr}`,
+          cidr,
+          target_ip: initData.target_ip,
+          devices,
+          summary: { total_hosts: totalHosts, total_responsive: devices.length, device_breakdown: deviceBreakdown },
+          sweep_time_ms: Date.now() - t0
+        });
         setSweepProgress(null);
         setHistory(prev => [{ tab: activeTab, query, time: new Date().toLocaleTimeString() }, ...prev.slice(0, 9)]);
       } catch (err: any) {
@@ -118,9 +168,14 @@ function OsintPanelInner({ isMobile, onSweepVisualize, onScanGeolocate }: OsintP
         case 'ssl': url = `/api/scanner?target=${encodeURIComponent(query)}&type=ssl`; break;
         case 'subdomains': url = `/api/scanner?target=${encodeURIComponent(query)}&type=subdomains`; break;
         case 'tech': url = `/api/scanner?target=${encodeURIComponent(query)}&type=tech`; break;
-        case 'shodan': url = `/api/osint/shodan?ip=${encodeURIComponent(query)}`; break;
+        case 'shodan': url = `https://internetdb.shodan.io/${encodeURIComponent(query)}`; break;
       }
-      const res = await fetch(url);
+      const res = await fetch(url, activeTab === 'shodan' ? { cache: 'no-store' } : undefined);
+      if (activeTab === 'shodan' && res.status === 404) {
+        setResults({ ip: query, status: 'No Shodan InternetDB records found', ports: [], cpes: [], hostnames: [], tags: [], vulns: [] });
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         setResults(data);
