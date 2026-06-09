@@ -93,7 +93,7 @@ async function fetchCanadaCameras(): Promise<any[]> {
         cams.push({
           id: `ottawa-muni-${cam.id}`, lat: cam.latitude, lng: cam.longitude,
           name: cam.description || 'Ottawa Traffic Camera', city: 'Ottawa', country: 'Canada',
-          feed_url: `https://traffic.ottawa.ca/map/camera?id=${cam.id}`, source: 'City of Ottawa',
+          feed_url: `https://traffic.ottawa.ca/map/camera?id=${cam.number || cam.id}`, source: 'City of Ottawa',
         });
       }
     }
@@ -112,7 +112,8 @@ async function fetchCanadaCameras(): Promise<any[]> {
         cams.push({
           id: `quebec511-${p.IDEcamera}`, lat: coords[1], lng: coords[0],
           name: p.DescriptionLocalisationEn || p.DescriptionLocalisationFr || 'Quebec 511 Camera', city: p.NomRegionDiffusion || 'Quebec', country: 'Canada',
-          external_url: p.URL_FLUX_DONNEE || `https://www.quebec511.info/Carte/Fenetres/FenetreVideo.html?id=${p.IDEcamera}`,
+          stream_url: p.URL_FLUX_DONNEE ? p.URL_FLUX_DONNEE.replace('FenetreVideo.html', 'camera.ashx') + '&format=mp4' : `https://www.quebec511.info/Carte/Fenetres/camera.ashx?id=${p.IDEcamera}&format=mp4`,
+          stream_type: 'mp4',
           source: 'Quebec 511',
         });
       }
