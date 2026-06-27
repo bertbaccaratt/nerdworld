@@ -21,7 +21,6 @@ const LayerPanel = dynamic(() => import('@/components/LayerPanel'));
 const CameraViewer = dynamic(() => import('@/components/CameraViewer'));
 const OsintPanel = dynamic(() => import('@/components/OsintPanel'));
 const EntityGraphPanel = dynamic(() => import('@/components/EntityGraphPanel'));
-
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -859,30 +858,7 @@ export default function Dashboard() {
 
         <UptimeClock />
         <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--text-muted)] opacity-50 ml-2">V.4.1</span>
-        
-       
       </motion.div>
-
-      {/* ── MOBILE: Compact top status ── */}
-      {isMobile && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute top-3 right-3 z-[200] pointer-events-auto flex items-center gap-2">
-          <TokenPanel />
-          <a href='https://ko-fi.com/M8D41ZYW4Z' target='_blank' rel='noopener noreferrer' className="glass-panel px-2 py-1 flex items-center gap-1.5 text-[7px] font-mono tracking-widest hover:opacity-80 transition-opacity border-[var(--gold-primary)]/40 bg-[var(--gold-primary)]/10">
-            <div className="w-1 h-1 rounded-full bg-[var(--gold-primary)] animate-osiris-pulse" />
-            <span className="text-[var(--gold-primary)] font-bold">SUPPORT PROJECT</span>
-          </a>
-        </motion.div>
-      )}
-      {isMobile && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute top-3 right-3 z-[200] pointer-events-auto flex items-center gap-2">
-          <a href='https://ko-fi.com/M8D41ZYW4Z' target='_blank' className="glass-panel px-2 py-1 flex items-center gap-1.5 text-[7px] font-mono tracking-widest hover:opacity-80 transition-opacity border-[var(--gold-primary)]/40 bg-[var(--gold-primary)]/10">
-            <div className="w-1 h-1 rounded-full bg-[var(--gold-primary)] animate-osiris-pulse" />
-            <span className="text-[var(--gold-primary)] font-bold">SUPPORT PROJECT</span>
-          </a>
-        </motion.div>
-      )}
-
-
 
       {/* ── NEW SIDEBAR (Root Level) ── */}
       {showLayers && !isMobile && <LayerPanel data={data} activeLayers={activeLayers} setActiveLayers={setActiveLayers} theme={osirisTheme} setTheme={setOsirisTheme} />}
@@ -1052,11 +1028,10 @@ export default function Dashboard() {
 
       {/* ═══ MOBILE UI ═══ */}
       {isMobile && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute top-3 right-3 z-[200] pointer-events-auto flex items-center gap-2">
-          <a href='https://ko-fi.com/M8D41ZYW4Z' target='_blank' rel='noopener noreferrer' className="glass-panel px-2 py-1 flex items-center gap-1.5 text-[7px] font-mono tracking-widest hover:opacity-80 transition-opacity border-[var(--gold-primary)]/40 bg-[var(--gold-primary)]/10">
-            <div className="w-1 h-1 rounded-full bg-[var(--gold-primary)] animate-osiris-pulse" />
-            <span className="text-[var(--gold-primary)] font-bold">SUPPORT PROJECT</span>
-       
+        <>
+          {/* Mobile Bottom Navigation */}
+          <div className="mobile-nav">
+            <div className="glass-panel mobile-nav-inner">
               {[
                 { id: 'layers' as const, icon: Layers, label: 'LAYERS' },
                 { id: 'markets' as const, icon: BarChart3, label: 'MARKETS' },
