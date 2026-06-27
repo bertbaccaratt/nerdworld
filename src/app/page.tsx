@@ -7,7 +7,7 @@ import { Layers, BarChart3, Newspaper, Search, X, Globe, MapPinned, Radar, Satel
 import IntelFeed from '@/components/IntelFeed';
 import MarketsPanel from '@/components/MarketsPanel';
 import ScmPanel from '@/components/ScmPanel';
-import SearchBar from '@/components/Sear'use client';chBar';
+import SearchBar from '@/components/SearchBar';
 import ScaleBar from '@/components/ScaleBar';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import SharePanel from '@/components/SharePanel';
