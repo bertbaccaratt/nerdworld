@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import ErrorBoundary from '@/components/ErrorBoundary';
 import "./globals.css";
 
-const SITE_URL = "https://osirisai.live";
-const SITE_NAME = "OSIRIS";
-const SITE_TITLE = "OSIRIS — Open Source Intelligence Platform | Live Flight Tracking, CCTV, OSINT Tools & More";
-const SITE_DESCRIPTION = "The open-source Palantir alternative. Track 10,000+ aircraft, 2,000 satellites, and worldwide CCTV cameras in real-time on a 3D globe. Run Nmap scans, DNS lookups, WHOIS queries, SSL cert analysis & threat intelligence — all from your browser. 20+ live data feeds including earthquakes, wildfires, nuclear facilities, cyber threats, and global conflicts. Free & open source.";
+const SITE_URL = "https://nerdsoneth.com";
+const SITE_NAME = "NERDSWORLD Intel Hub";
+const SITE_TITLE = "NERDSWORLD Intel Hub — Live OSINT Map | nerdsoneth.com";
+const SITE_DESCRIPTION = "NERDSWORLD Intel Hub — live flight tracking, CCTV, earthquakes, news feeds, and OSINT tools. Powered by OSIRIS. Built for the NERDS on ETH community.";
 
 export const viewport: Viewport = {
   themeColor: "#D4AF37",
@@ -120,7 +120,7 @@ export const metadata: Metadata = {
   other: {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "OSIRIS",
+    "apple-mobile-web-app-title": "NERDSWORLD",
     "mobile-web-app-capable": "yes",
     "msapplication-TileColor": "#06060C",
     "msapplication-config": "none",
