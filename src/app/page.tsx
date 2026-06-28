@@ -834,7 +834,7 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-3 mt-1.5 pl-[44px] min-w-0 pr-4">
           <span className="text-[5px] md:text-[6px] text-[var(--text-muted)] font-mono tracking-[0.2em] md:tracking-[0.3em] uppercase opacity-40 truncate">
-            LIVE FOR THE COMMUNITY · POWERED BY OSIRIS <span className="hidden md:inline">· OPEN SOURCE INTELLIGENCE</span>
+            LIVE FOR THE COMMUNITY · POWERED BY BERT BACCARATT <span className="hidden md:inline">· 2026</span>
           </span>
         </div>
       </motion.div>
