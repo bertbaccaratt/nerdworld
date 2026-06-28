@@ -823,6 +823,10 @@ export default function Dashboard() {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 2.5 }} className={`absolute top-4 z-[200] pointer-events-none flex flex-col`} style={{ left: isMobile ? '24px' : '96px', right: '24px' }}>
         <div className="flex items-center gap-3 w-fit">
                    <img
+  src="/image0.png"
+  alt="NerdsWorld"
+  className="w-8 h-8 md:w-10 md:h-10 shrink-0 object-contain"
+/>
             src="/image0.png"
             alt="NerdsWorld"
             className="w-8 h-8 md:w-10 md:h-10 shrink-0 object-contain"
