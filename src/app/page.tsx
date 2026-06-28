@@ -826,7 +826,7 @@ export default function Dashboard() {
   src="/image0.png"
   alt="NerdsWorld"
   className="w-8 h-8 md:w-10 md:h-10 shrink-0 object-contain"
-/>
+
             src="/image0.png"
             alt="NerdsWorld"
             className="w-8 h-8 md:w-10 md:h-10 shrink-0 object-contain"
